@@ -1,5 +1,6 @@
 import pygame 
 from settings import *
+from support import import_folder
 
 class Player(pygame.sprite.Sprite):
 	def __init__(self,pos,groups,obstacle_sprites):
@@ -8,9 +9,11 @@ class Player(pygame.sprite.Sprite):
 		self.rect = self.image.get_rect(topleft = pos)
 		self.hitbox = self.rect.inflate(0, -20)
 
+		self.import_player_asset()
+
 		self.direction = pygame.math.Vector2()
 		self.speed = 5
-
+ 
 		self.attacking=False
 		self.attack_time=None
 		self.attack_cooldown=400
@@ -33,9 +36,26 @@ class Player(pygame.sprite.Sprite):
 		else:
 			self.direction.x = 0
 		if keys[pygame.K_z] and not self.attacking:
+			self.attacking= True
+			self.attack_time=pygame.time.get_ticks()
 			print('attack')
 		if keys[pygame.K_x] and not self.attacking:
+			self.attacking= True
+			self.attack_time = pygame.time.get_ticks()
 			print('magic')
+	def import_player_asset(self):
+		charcter_path='../graphics/player/'
+		self.animations={ 'up':[],'down':[],'left':[],'right':[],
+						  'right_idle':[],'left_idle':[],'up_idle':[],'down_idle':[],
+						  'right_attack':[],'left_attack':[],'up_attack':[],'down_attack':[],}
+		for animation in self.animations.keys():
+			full_path=charcter_path+animation
+			self.animations[animation]=import_folder(full_path)
+		print(self.animations)
+
+
+
+
 	def move(self,speed):
 		if self.direction.magnitude() != 0:
 			self.direction = self.direction.normalize()
@@ -65,7 +85,11 @@ class Player(pygame.sprite.Sprite):
 						self.hitbox.top = sprite.hitbox.bottom
 
 	def cooldowns(self):
-		pass
+		current_time=pygame.time.get_ticks()
+		if self.attacking:
+			if current_time - self.attack_time>=self.attack_cooldown:
+				self.attacking=False
 	def update(self):
 		self.input()
+		self.cooldowns()
 		self.move(self.speed)
