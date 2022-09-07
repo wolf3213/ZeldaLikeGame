@@ -3,7 +3,7 @@ from settings import *
 from support import import_folder
 
 class Player(pygame.sprite.Sprite):
-	def __init__(self,pos,groups,obstacle_sprites):
+	def __init__(self,pos,groups,obstacle_sprites,create_attack,destroy_attack):
 		super().__init__(groups)
 		self.image = pygame.image.load('../graphics/test/player.png').convert_alpha()
 		self.rect = self.image.get_rect(topleft = pos)
@@ -21,8 +21,17 @@ class Player(pygame.sprite.Sprite):
 		self.attacking=False
 		self.attack_time=None
 		self.attack_cooldown=400
+
 		self.obstacle_sprites = obstacle_sprites
 
+		self.create_attack = create_attack
+		self.destroy_attack=destroy_attack
+
+		self.weapon_index=0
+		self.weapon= list(weapon_data.keys())[self.weapon_index]
+		self.can_switch_weapon=True
+		self.weapon_switch_time=None
+		self.weapon_switch_cooldown=200
 	def input(self):
 		if not self.attacking:
 			keys = pygame.key.get_pressed()
@@ -48,11 +57,20 @@ class Player(pygame.sprite.Sprite):
 			if keys[pygame.K_z] and not self.attacking:
 				self.attacking= True
 				self.attack_time=pygame.time.get_ticks()
+				self.create_attack()
 				print('attack')
 			if keys[pygame.K_x] and not self.attacking:
 				self.attacking= True
 				self.attack_time = pygame.time.get_ticks()
 				print('magic')
+			if keys[pygame.K_q] and (self.can_switch_weapon):
+				self.can_switch_weapon=False
+				self.weapon_switch_time=pygame.time.get_ticks()
+				if self.weapon_index<len(list(weapon_data.keys()))-1:
+					self.weapon_index+=1
+				else:
+					self.weapon_index=0
+				self.weapon = list(weapon_data.keys())[self.weapon_index]
 	def import_player_asset(self):
 		charcter_path='../graphics/player/'
 		self.animations={ 'up':[],'down':[],'left':[],'right':[],
@@ -112,6 +130,10 @@ class Player(pygame.sprite.Sprite):
 		if self.attacking:
 			if current_time - self.attack_time>=self.attack_cooldown:
 				self.attacking=False
+				self.destroy_attack()
+		if self.can_switch_weapon==False:
+			if current_time - self.weapon_switch_time>=self.weapon_switch_cooldown:
+				self.can_switch_weapon=True
 	def animate (self):
 		animation=self.animations[self.status]
 		#loop over frame
