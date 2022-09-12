@@ -28,6 +28,10 @@ class UI:
         x=self.display_surface.get_size()[0]-20
         y=self.display_surface.get_size()[1]-20
         text_rect=text_surf.get_rect(bottomright=(x,y))
+        #backround
+        pygame.draw.rect(self.display_surface, UI_BG_COLOR, text_rect.inflate(20, 10))
+        pygame.draw.rect(self.display_surface,UI_BORDER_COLOR,text_rect.inflate(20,10),3)
+
         self.display_surface.blit(text_surf,text_rect)
     def display(self,player):
         #pygame.draw.rect(self.display_surface,'red', self.health_bar_rect)
