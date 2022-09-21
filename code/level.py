@@ -17,7 +17,7 @@ class Level:
 		self.visible_sprites = YSortCameragroup()
 		self.obstacle_sprites = pygame.sprite.Group()
 		#attack sprites
-		self.current=None
+		self.current_attack=None
 		# sprite setup
 		self.create_map()
 		#user interfence
